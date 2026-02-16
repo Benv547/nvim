@@ -1,8 +1,9 @@
 return {
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
+  lazy = false,
   config = function()
-    local treesitter = require("nvim-treesitter.configs")
+    local treesitter = require("nvim-treesitter.config")
 
     -- configuration de treesitter
     treesitter.setup({
@@ -15,6 +16,7 @@ return {
 
       -- langages installés et configurés
       ensure_installed = {
+        "angular",
         "bash",
         "dockerfile",
         "gitignore",
@@ -22,6 +24,8 @@ return {
         "javascript",
         "json",
         "lua",
+        "css",
+        "scss",
         "markdown",
         "markdown_inline",
         "python",
@@ -31,6 +35,7 @@ return {
         "vim",
         "yaml",
       },
+      auto_install = true,
       -- lorse de l'appui sur <Ctrl-space> sélectionne le bloc
       -- courant spécifique au langage de programmation
       incremental_selection = {

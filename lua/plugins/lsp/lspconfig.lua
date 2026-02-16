@@ -7,19 +7,19 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     -- Ajoute les « code actions » de type renommage de fichiers intelligent, etc
     { "antosha417/nvim-lsp-file-operations", config = true },
-    { "folke/lazydev.nvim", opts = {} },
+    { "folke/lazydev.nvim",                  opts = {} },
   },
   keys = {
-    { "<leader>ca", vim.lsp.buf.code_action, desc = "Code Action", mode = { "n", "v" } },
-    { "gR", "<cmd>Telescope lsp_references<CR>", desc = "Show LSP references", mode = "n" },
-    { "gD", vim.lsp.buf.declaration, desc = "Go to declaration", mode = "n" },
-    { "gd", "<cmd>Telescope lsp_definitions<CR>", desc = "Show LSP definitions", mode = "n" },
-    { "gi", "<cmd>Telescope lsp_implementations<CR>", desc = "Show LSP implementations", mode = "n" },
-    { "gt", "<cmd>Telescope lsp_type_definitions<CR>", desc = "Show LSP type definitions", mode = "n" },
-    { "gs", vim.lsp.buf.signature_help, desc = "Show LSP signature help", mode = "n" },
-    { "<leader>rn", vim.lsp.buf.rename, desc = "Smart rename", mode = "n" },
-    { "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", desc = "Show buffer diagnostics", mode = "n" },
-    { "<leader>d", vim.diagnostic.open_float, desc = "Show line diagnostics", mode = "n" },
+    { "<leader>ca", vim.lsp.buf.code_action,                   desc = "Code Action",               mode = { "n", "v" } },
+    { "gR",         "<cmd>Telescope lsp_references<CR>",       desc = "Show LSP references",       mode = "n" },
+    { "gD",         vim.lsp.buf.declaration,                   desc = "Go to declaration",         mode = "n" },
+    { "gd",         "<cmd>Telescope lsp_definitions<CR>",      desc = "Show LSP definitions",      mode = "n" },
+    { "gi",         "<cmd>Telescope lsp_implementations<CR>",  desc = "Show LSP implementations",  mode = "n" },
+    { "gt",         "<cmd>Telescope lsp_type_definitions<CR>", desc = "Show LSP type definitions", mode = "n" },
+    { "gs",         vim.lsp.buf.signature_help,                desc = "Show LSP signature help",   mode = "n" },
+    { "<leader>rn", vim.lsp.buf.rename,                        desc = "Smart rename",              mode = "n" },
+    { "<leader>D",  "<cmd>Telescope diagnostics bufnr=0<CR>",  desc = "Show buffer diagnostics",   mode = "n" },
+    { "<leader>d",  vim.diagnostic.open_float,                 desc = "Show line diagnostics",     mode = "n" },
     {
       "[d",
       function()
@@ -36,9 +36,9 @@ return {
       desc = "Go to next diagnostic",
       mode = "n",
     },
-    { "K", vim.lsp.buf.hover, desc = "Show documentation for what is under cursor", mode = "n" },
-    { "<leader>F", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", desc = "Format buffer", mode = { "n", "x" } },
-    { "<leader>rs", ":LspRestart<CR>", desc = "Restart LSP", mode = "n" },
+    { "K",          vim.lsp.buf.hover,                                 desc = "Show documentation for what is under cursor", mode = "n" },
+    { "<leader>F",  "<cmd>lua vim.lsp.buf.format({async = true})<cr>", desc = "Format buffer",                               mode = { "n", "x" } },
+    { "<leader>rs", ":LspRestart<CR>",                                 desc = "Restart LSP",                                 mode = "n" },
   },
   config = function()
     -- Customize error signs
@@ -116,6 +116,63 @@ return {
             },
           },
         },
+      },
+    })
+
+    -- TypeScript/JavaScript
+    vim.lsp.config("ts_ls", {
+      root_dir = vim.fs.root(0, { "package.json", "tsconfig.json" }),
+      settings = {
+        typescript = {
+          inlayHints = {
+            includeInlayParameterNameHints = "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+          },
+        },
+        javascript = {
+          inlayHints = {
+            includeInlayParameterNameHints = "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+          },
+        },
+      },
+    })
+
+    -- Angular
+    vim.lsp.config("angularls", {
+      root_dir = vim.fs.root(0, { "angular.json", "project.json" }),
+      filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" },
+      cmd = {
+        "ngserver",
+        "--stdio",
+        "--tsProbeLocations",
+        vim.fn.getcwd(),
+        "--ngProbeLocations",
+        vim.fn.getcwd(),
+      },
+    })
+
+    -- HTML (pour les templates Angular)
+    vim.lsp.config("html", {
+      filetypes = { "html", "htmlangular" },
+    })
+
+    -- CSS/SCSS
+    vim.lsp.config("cssls", {
+      settings = {
+        css = { validate = true },
+        scss = { validate = true },
+        less = { validate = true },
       },
     })
   end,
