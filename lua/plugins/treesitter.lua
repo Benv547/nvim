@@ -1,23 +1,22 @@
 return {
   "nvim-treesitter/nvim-treesitter",
   dependencies = {
-    "windwp/nvim-ts-autotag", -- ← Ajoutez ceci
+    "windwp/nvim-ts-autotag",
   },
   build = ":TSUpdate",
   lazy = false,
   config = function()
     local treesitter = require("nvim-treesitter.config")
 
-    -- configuration de treesitter
+
+    -- ← Initialisation de nvim-ts-autotag
+    require("nvim-ts-autotag").setup()
+
     treesitter.setup({
-      -- activation de la coloration syntaxique
       highlight = {
         enable = true,
       },
-      -- activation de l'indentation améliorée
       indent = { enable = true },
-
-      -- langages installés et configurés
       ensure_installed = {
         "angular",
         "bash",
@@ -39,8 +38,6 @@ return {
         "yaml",
       },
       auto_install = true,
-      -- lorse de l'appui sur <Ctrl-space> sélectionne le bloc
-      -- courant spécifique au langage de programmation
       incremental_selection = {
         enable = true,
         keymaps = {
