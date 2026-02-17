@@ -4,6 +4,8 @@ vim.g.mapleader = " "
 -- Raccourci pour la fonction set
 local keymap = vim.keymap.set
 
+-- on copie le fichier dans le presse-papiers du système
+keymap('n', '<leader>ya', ':%y+<CR>', { noremap = true, silent = true })
 -- on utilise ;; pour sortir du monde insertion
 keymap("i", ";;", "<ESC>", { desc = "Sortir du mode insertion avec ;;" })
 
