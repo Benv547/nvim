@@ -8,12 +8,18 @@ return {
   config = function()
     require("nvim-tree").setup({})
 
-    -- On utilise <leader>e pour ouvrir/fermer l'explorateur
-    vim.keymap.set(
-      "n",
-      "<leader>e",
-      "<cmd>NvimTreeFindFileToggle<CR>",
-      { desc = "Ouverture/fermeture de l'explorateur de fichiers" }
-    )
+    -- Wrapper autour du toggle nvim-tree :
+    -- on réapplique le layout de la sidebar juste après, de façon synchrone
+    vim.keymap.set("n", "<leader>e", function()
+      -- 1. Ouvre/ferme nvim-tree normalement
+      vim.cmd("NvimTreeFindFileToggle")
+
+      -- 2. Réapplique immédiatement le layout de la sidebar
+      --    (synchrone : nvim-tree a déjà fini à ce stade)
+      local ok, sidebar = pcall(require, "sidebar-notepad")
+      if ok then
+        sidebar.reapply_layout()
+      end
+    end, { desc = "Ouverture/fermeture de l'explorateur de fichiers" })
   end,
 }

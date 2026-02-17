@@ -29,6 +29,7 @@ return {
       -- Mais au lieu de passer par :Mason pour installer, je vous recommande d'ajouter une entrée à cette liste
       -- Ça permettra à votre configuration d'être plus portable
       ensure_installed = {
+        "angularls",
         "cssls",
         "elmls",
         "graphql",
