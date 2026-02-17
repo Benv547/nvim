@@ -18,7 +18,7 @@ local config = {
   note_filetype = "markdown",
   -- Dossier où sont stockés les fichiers de notes (un par projet)
   -- Par défaut : stdpath("data")/sidebar-notes/
-  notes_dir = vim.fn.stdpath("data") .. "/sidebar-notes",
+  notes_dir = vim.fn.stdpath("data") .. "/sidebar-notes",  -- inutilisé désormais
   cam_placeholder = {
     "",
     "  ╔══════════════════════════╗",
@@ -35,19 +35,13 @@ local config = {
 -- ── Persistance ───────────────────────────────────────────────────────────────
 
 -- Transforme le cwd en un nom de fichier safe : /home/user/monprojet → home_user_monprojet.md
+-- Le fichier de notes est à la racine du projet courant
 local function cwd_to_filename()
-  local cwd = vim.fn.getcwd()
-  -- Remplace les séparateurs et caractères spéciaux par des underscores
-  local name = cwd:gsub("[/\\:]+", "_"):gsub("^_", "")
-  return config.notes_dir .. "/" .. name .. ".md"
+  return vim.fn.getcwd() .. "/.nvim-notes.md"
 end
 
--- Assure que le dossier de notes existe
-local function ensure_notes_dir()
-  if vim.fn.isdirectory(config.notes_dir) == 0 then
-    vim.fn.mkdir(config.notes_dir, "p")
-  end
-end
+-- Pas de dossier à créer : le fichier est dans le cwd qui existe déjà
+local function ensure_notes_dir() end
 
 -- Sauvegarde le buffer de notes dans son fichier projet
 local function save_note_buf()
