@@ -155,6 +155,7 @@ local function style_cam_win(win)
   wo.winhighlight = "Normal:SidebarCam,SignColumn:SidebarCam,EndOfBuffer:SidebarCam"
   wo.winfixwidth = true
   wo.winfixheight = true
+  wo.winfixbuf = true
 end
 
 local function style_note_win(win)
@@ -170,6 +171,7 @@ local function style_note_win(win)
   wo.winhighlight = "Normal:SidebarNote,SignColumn:SidebarNote,CursorLine:SidebarNoteCursor"
   wo.winfixwidth = true
   wo.winfixheight = true
+  wo.winfixbuf = true
 end
 
 local function setup_highlights()
