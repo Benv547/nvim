@@ -30,12 +30,12 @@ return {
         end, { buffer = bufnr, desc = "nvim-tree: Run command in current path" })
       end,
     })
-    -- Wrapper toggle : réapplique le layout de la sidebar après ouverture/fermeture
-    vim.keymap.set("n", "<leader>e", function()
-      vim.cmd("NvimTreeFindFileToggle")
-      local ok, sidebar = pcall(require, "sidebar-notepad")
-      if ok then sidebar.reapply_layout() end
-    end, { desc = "Ouverture/fermeture de l'explorateur de fichiers" })
+    -- On utilise <leader>e pour ouvrir/fermer l'explorateur
+    vim.keymap.set(
+      "n",
+      "<leader>e",
+      "<cmd>NvimTreeFindFileToggle<CR>",
+      { desc = "Ouverture/fermeture de l'explorateur de fichiers" }
+    )
   end,
 }
-
