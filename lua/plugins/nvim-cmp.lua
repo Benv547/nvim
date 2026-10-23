@@ -40,20 +40,38 @@ return {
       mapping = {
         ["<C-k>"] = cmp.mapping.select_prev_item(),
         ["<C-j>"] = cmp.mapping.select_next_item(),
-        ["<C-b>"] = cmp.mapping.scroll_docs(-1),
-        ["<C-f>"] = cmp.mapping.scroll_docs(1),
+        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+        ["<C-f>"] = cmp.mapping.scroll_docs(4),
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<C-e>"] = cmp.mapping.abort(),
-        ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accepte la sélection courante. Mettre à `false` pour ne confirmer que les items explicitement sélectionnés
+        -- Entrée ne valide que si un élément a été choisi explicitement :
+        -- sinon on passe à la ligne normalement, même si le menu est ouvert
+        ["<CR>"] = cmp.mapping.confirm({ select = false }),
+        -- Ctrl-l / Ctrl-h : champ suivant / précédent dans un snippet
+        -- (Tab reste réservé à Copilot ; hors snippet, Ctrl-h garde son rôle d'effacement)
+        ["<C-l>"] = cmp.mapping(function(fallback)
+          if luasnip.locally_jumpable(1) then
+            luasnip.jump(1)
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+        ["<C-h>"] = cmp.mapping(function(fallback)
+          if luasnip.locally_jumpable(-1) then
+            luasnip.jump(-1)
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
       },
 
       -- sources pour l'autocompletion
       sources = cmp.config.sources({
+        { name = "lazydev", group_index = 0 }, -- API Neovim dans les fichiers de config lua
         { name = "nvim_lsp" }, -- lsp
-        { name = "nvim_lua" },
         { name = "luasnip" },  -- snippets
         { name = "buffer" },   -- texte du buffer courant
-        { name = "path" },     -- chemins dy système de fichier
+        { name = "path" },     -- chemins du système de fichier
         { name = "emoji" },    -- emojis
       }),
 

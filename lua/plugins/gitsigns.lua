@@ -16,8 +16,12 @@ return {
       end
 
       -- Navigation
-      map("n", "]h", gs.next_hunk, "Next Hunk")
-      map("n", "[h", gs.prev_hunk, "Prev Hunk")
+      map("n", "]h", function()
+        gs.nav_hunk("next")
+      end, "Next Hunk")
+      map("n", "[h", function()
+        gs.nav_hunk("prev")
+      end, "Prev Hunk")
 
       -- Actions
       map("n", "<leader>hs", gs.stage_hunk, "Stage hunk")
@@ -32,7 +36,8 @@ return {
       map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
       map("n", "<leader>hR", gs.reset_buffer, "Reset buffer")
 
-      map("n", "<leader>hu", gs.undo_stage_hunk, "Undo stage hunk")
+      -- <leader>hs sur un hunk déjà indexé le retire de l'index
+      -- (remplace l'ancien undo_stage_hunk, déprécié)
 
       map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
 
@@ -47,7 +52,7 @@ return {
       end, "Diff this ~")
 
       -- Text object
-      map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "Gitsigns select hunk")
+      map({ "o", "x" }, "ih", gs.select_hunk, "Gitsigns select hunk")
     end,
   },
 }

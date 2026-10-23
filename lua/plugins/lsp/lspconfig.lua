@@ -7,94 +7,76 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     -- Ajoute les « code actions » de type renommage de fichiers intelligent, etc
     { "antosha417/nvim-lsp-file-operations", config = true },
-    { "folke/lazydev.nvim",                  opts = {} },
-  },
-  keys = {
-    { "<leader>ca", vim.lsp.buf.code_action,                   desc = "Code Action",               mode = { "n", "v" } },
-    { "gR",         "<cmd>Telescope lsp_references<CR>",       desc = "Show LSP references",       mode = "n" },
-    { "gD",         vim.lsp.buf.declaration,                   desc = "Go to declaration",         mode = "n" },
-    { "gd",         "<cmd>Telescope lsp_definitions<CR>",      desc = "Show LSP definitions",      mode = "n" },
-    { "gi",         "<cmd>Telescope lsp_implementations<CR>",  desc = "Show LSP implementations",  mode = "n" },
-    { "gt",         "<cmd>Telescope lsp_type_definitions<CR>", desc = "Show LSP type definitions", mode = "n" },
-    { "gs",         vim.lsp.buf.signature_help,                desc = "Show LSP signature help",   mode = "n" },
-    { "<leader>rn", vim.lsp.buf.rename,                        desc = "Smart rename",              mode = "n" },
-    { "<leader>D",  "<cmd>Telescope diagnostics bufnr=0<CR>",  desc = "Show buffer diagnostics",   mode = "n" },
-    { "<leader>d",  vim.diagnostic.open_float,                 desc = "Show line diagnostics",     mode = "n" },
-    {
-      "[d",
-      function()
-        vim.diagnostic.jump({ count = -1, float = true })
-      end,
-      desc = "Go to previous diagnostic",
-      mode = "n",
-    },
-    {
-      "]d",
-      function()
-        vim.diagnostic.jump({ count = 1, float = true })
-      end,
-      desc = "Go to next diagnostic",
-      mode = "n",
-    },
-    { "K",          vim.lsp.buf.hover,                                 desc = "Show documentation for what is under cursor", mode = "n" },
-    { "<leader>F",  "<cmd>lua vim.lsp.buf.format({async = true})<cr>", desc = "Format buffer",                               mode = { "n", "x" } },
-    { "<leader>rs", ":LspRestart<CR>",                                 desc = "Restart LSP",                                 mode = "n" },
+    { "folke/lazydev.nvim", ft = "lua", opts = {} },
   },
   config = function()
-    -- Customize error signs
+    -- ── Diagnostics ───────────────────────────────────────────────────────────
+    -- Depuis Neovim 0.11, le texte virtuel est désactivé par défaut : on le réactive
     vim.diagnostic.config({
+      virtual_text = true,
+      severity_sort = true,
       signs = {
         text = {
-          [vim.diagnostic.severity.ERROR] = "",
-          [vim.diagnostic.severity.WARN] = "",
-          [vim.diagnostic.severity.INFO] = "",
+          [vim.diagnostic.severity.ERROR] = "",
+          [vim.diagnostic.severity.WARN] = "",
+          [vim.diagnostic.severity.INFO] = "",
           [vim.diagnostic.severity.HINT] = "󰌵",
         },
       },
     })
-    -- Python
-    vim.lsp.config("pylsp", {
-      settings = {
-        pylsp = {
-          plugins = {
-            -- formatter options
-            black = { enabled = true },
-            autopep8 = { enabled = false },
-            yapf = { enabled = false },
-            -- linter options
-            pyflakes = { enabled = false },
-            pycodestyle = {
-              enabled = true,
-              ignore = { "E501" },
-            },
-            -- type checker
-            pylsp_mypy = { enabled = true },
-            -- auto-completion options
-            jedi_completion = { fuzzy = true },
-            -- import sorting
-            pylsp_isort = { enabled = true },
-            rope_completion = { enabled = true },
-            rope_autoimport = {
-              enabled = true,
-            },
-          },
-        },
-      },
+
+    -- ── Capacités communes à tous les serveurs (complétion nvim-cmp) ─────────
+    vim.lsp.config("*", {
+      capabilities = require("cmp_nvim_lsp").default_capabilities(),
     })
 
-    vim.lsp.config("ruff", {
-      settings = {
-        init_options = {
-          settings = {
-            -- Arguments par défaut de la ligne de commande ruff
-            -- (on ajoute les warnings pour le tri des imports)
-            args = { "--extend-select", "I" },
-          },
-        },
-      },
+    -- ── Raccourcis et inlay hints, uniquement dans les buffers avec un LSP ───
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("user-lsp-attach", { clear = true }),
+      callback = function(args)
+        local bufnr = args.buf
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+        local function map(mode, lhs, rhs, desc)
+          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+        end
+
+        map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+        map("n", "gR", "<cmd>Telescope lsp_references<CR>", "Références (LSP)")
+        map("n", "gD", vim.lsp.buf.declaration, "Aller à la déclaration")
+        map("n", "gd", "<cmd>Telescope lsp_definitions<CR>", "Aller à la définition")
+        map("n", "gI", "<cmd>Telescope lsp_implementations<CR>", "Implémentations (LSP)")
+        map("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", "Définition du type")
+        map("n", "gs", vim.lsp.buf.signature_help, "Signature")
+        map("n", "K", vim.lsp.buf.hover, "Documentation sous le curseur")
+        map("n", "<leader>rn", vim.lsp.buf.rename, "Renommer le symbole")
+        map("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", "Diagnostics du buffer")
+        map("n", "<leader>d", vim.diagnostic.open_float, "Diagnostic de la ligne")
+        map("n", "[d", function()
+          vim.diagnostic.jump({ count = -1, float = true })
+        end, "Diagnostic précédent")
+        map("n", "]d", function()
+          vim.diagnostic.jump({ count = 1, float = true })
+        end, "Diagnostic suivant")
+        map("n", "<leader>rs", "<cmd>LspRestart<CR>", "Redémarrer le LSP")
+
+        -- Python : ruff ne fournit pas de vraie documentation au survol,
+        -- on laisse pylsp s'en charger pour éviter les doublons
+        if client and client.name == "ruff" then
+          client.server_capabilities.hoverProvider = false
+        end
+
+        -- Inlay hints activés par défaut, avec un raccourci pour les masquer
+        if client and client:supports_method("textDocument/inlayHint") then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+          map("n", "<leader>th", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+          end, "Afficher/masquer les inlay hints")
+        end
+      end,
     })
 
-    -- Rust
+    -- ── Rust ──────────────────────────────────────────────────────────────────
     vim.lsp.config("rust_analyzer", {
       settings = {
         ["rust-analyzer"] = {
@@ -119,55 +101,103 @@ return {
       },
     })
 
-    -- TypeScript/JavaScript
-    vim.lsp.config("ts_ls", {
-      root_dir = vim.fs.root(0, { "package.json", "tsconfig.json" }),
+    -- ── Python ────────────────────────────────────────────────────────────────
+    -- Répartition des rôles :
+    --   pylsp → complétion, documentation, navigation, typage (mypy)
+    --   ruff  → lint, tri des imports et formatage (via conform)
+    -- Les plugins pylsp qui feraient doublon avec ruff sont désactivés.
+    -- mypy et rope sont des extensions à installer une fois dans nvim :
+    --   :PylspInstall pylsp-mypy pylsp-rope
+    vim.lsp.config("pylsp", {
       settings = {
-        typescript = {
-          inlayHints = {
-            includeInlayParameterNameHints = "all",
-            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-            includeInlayFunctionParameterTypeHints = true,
-            includeInlayVariableTypeHints = true,
-            includeInlayPropertyDeclarationTypeHints = true,
-            includeInlayFunctionLikeReturnTypeHints = true,
-            includeInlayEnumMemberValueHints = true,
-          },
-        },
-        javascript = {
-          inlayHints = {
-            includeInlayParameterNameHints = "all",
-            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-            includeInlayFunctionParameterTypeHints = true,
-            includeInlayVariableTypeHints = true,
-            includeInlayPropertyDeclarationTypeHints = true,
-            includeInlayFunctionLikeReturnTypeHints = true,
-            includeInlayEnumMemberValueHints = true,
+        pylsp = {
+          plugins = {
+            -- formatage et lint : délégués à ruff
+            black = { enabled = false },
+            autopep8 = { enabled = false },
+            yapf = { enabled = false },
+            pyflakes = { enabled = false },
+            pycodestyle = { enabled = false },
+            mccabe = { enabled = false },
+            pylsp_isort = { enabled = false },
+            -- vérification de types
+            pylsp_mypy = { enabled = true },
+            -- complétion
+            jedi_completion = { fuzzy = true },
+            rope_completion = { enabled = true },
+            rope_autoimport = { enabled = true },
           },
         },
       },
     })
 
-    -- Angular
-    vim.lsp.config("angularls", {
-      root_dir = vim.fs.root(0, { "angular.json", "project.json" }),
-      filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" },
-      cmd = {
-        "ngserver",
-        "--stdio",
-        "--tsProbeLocations",
-        vim.fn.getcwd(),
-        "--ngProbeLocations",
-        vim.fn.getcwd(),
+    vim.lsp.config("ruff", {
+      init_options = {
+        settings = {
+          -- on ajoute les avertissements sur le tri des imports (règles « I »)
+          lint = { extendSelect = { "I" } },
+        },
       },
     })
 
-    -- HTML (pour les templates Angular)
+    -- ── SQL ───────────────────────────────────────────────────────────────────
+    -- sqlls fonctionne sans configuration pour la complétion de base ;
+    -- pour la complétion des tables, ajouter un fichier .sqllsrc.json
+    -- décrivant la connexion à la base à la racine du projet.
+
+    -- ── TypeScript / JavaScript / React / Vue ────────────────────────────────
+    local inlay_hints = {
+      includeInlayParameterNameHints = "all",
+      includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+      includeInlayFunctionParameterTypeHints = true,
+      includeInlayVariableTypeHints = true,
+      includeInlayPropertyDeclarationTypeHints = true,
+      includeInlayFunctionLikeReturnTypeHints = true,
+      includeInlayEnumMemberValueHints = true,
+    }
+
+    -- Plugin TypeScript fourni par vue-language-server (installé par Mason) :
+    -- il permet à ts_ls de comprendre le <script lang="ts"> des fichiers .vue
+    local vue_plugin_path = vim.fn.stdpath("data")
+      .. "/mason/packages/vue-language-server/node_modules/@vue/language-server"
+
+    -- Pas de root_dir figé : nvim-lspconfig détecte la racine de chaque projet
+    vim.lsp.config("ts_ls", {
+      filetypes = {
+        "javascript",
+        "javascriptreact",
+        "javascript.jsx",
+        "typescript",
+        "typescriptreact",
+        "typescript.tsx",
+        "vue",
+      },
+      init_options = {
+        plugins = {
+          {
+            name = "@vue/typescript-plugin",
+            location = vue_plugin_path,
+            languages = { "vue" },
+          },
+        },
+      },
+      settings = {
+        typescript = { inlayHints = inlay_hints },
+        javascript = { inlayHints = inlay_hints },
+      },
+    })
+
+    -- ── Angular ───────────────────────────────────────────────────────────────
+    -- La config par défaut de nvim-lspconfig gère déjà les templates (htmlangular)
+    -- et trouve @angular/language-service dans le node_modules du projet.
+    -- Rien à surcharger.
+
+    -- ── HTML (y compris les templates Angular) ──────────────────────────────
     vim.lsp.config("html", {
       filetypes = { "html", "htmlangular" },
     })
 
-    -- CSS/SCSS
+    -- ── CSS / SCSS / Less ────────────────────────────────────────────────────
     vim.lsp.config("cssls", {
       settings = {
         css = { validate = true },

@@ -1,8 +1,13 @@
 return {
   "okuuva/auto-save.nvim",
-  event = { "InsertLeave", "TextChanged" }, -- optional for lazy loading on trigger events
+  event = "VeryLazy",
   opts = {
-    -- your config goes here
-    -- or just leave it empty :)
+    -- On sauvegarde seulement en quittant le buffer ou en perdant le focus,
+    -- pour éviter que le formatage à la sauvegarde ne s'exécute en pleine édition
+    trigger_events = {
+      immediate_save = { "BufLeave", "FocusLost", "QuitPre", "VimSuspend" },
+      defer_save = {},
+      cancel_deferred_save = {},
+    },
   },
 }

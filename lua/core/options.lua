@@ -39,8 +39,15 @@ opt.swapfile = false -- on supprime le pénible fichier de swap
 
 opt.undofile = true -- on autorise l'undo à l'infini (même quand on revient sur un fichier qu'on avait fermé)
 
-opt.iskeyword:append("-") -- on traite les mots avec des - comme un seul mot
-
 -- affichage des caractères spéciaux
 opt.list = true
 opt.listchars:append({ nbsp = "␣", trail = "•", precedes = "«", extends = "»", tab = "> " })
+
+-- Les mots avec des - comptent comme un seul mot, mais uniquement là où c'est utile
+-- (en Rust/TS, `x-1` doit rester trois mots pour w, * et ciw)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "css", "scss", "less", "html", "htmlangular" },
+  callback = function()
+    vim.opt_local.iskeyword:append("-")
+  end,
+})

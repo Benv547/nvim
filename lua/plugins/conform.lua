@@ -1,32 +1,37 @@
 return {
   "stevearc/conform.nvim",
-  opts = {},
   event = { "BufReadPre", "BufNewFile" },
   config = function()
     local conform = require("conform")
 
     conform.setup({
       formatters_by_ft = {
-        css = { "prettier" },
-        elm = { "elm_format" },
-        graphql = { "prettier" },
-        json = { "prettier" },
-        html = { "prettier" },
-        liquid = { "prettier" },
-        lua = { "stylua" },
-        markdown = { "prettier" },
-        python = { "ruff_fix", "ruff_format" },
+        -- Rust
         rust = { "rustfmt" },
-        svelte = { "prettier" },
+        -- Web
+        html = { "prettier" },
+        htmlangular = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
+        less = { "prettier" },
         javascript = { "prettier" },
         javascriptreact = { "prettier" },
         typescript = { "prettier" },
         typescriptreact = { "prettier" },
+        vue = { "prettier" },
+        -- Python (ruff_fix applique les corrections automatiques, puis imports et formatage)
+        python = { "ruff_fix", "ruff_organize_imports", "ruff_format" },
+        -- SQL : pas de formateur, pour ne pas réécrire tes requêtes à chaque sauvegarde
+        -- Divers
+        json = { "prettier" },
+        jsonc = { "prettier" },
         yaml = { "prettier" },
+        markdown = { "prettier" },
+        lua = { "stylua" },
+        -- toml : pas de formateur dédié, conform utilise le LSP taplo en repli
       },
       format_on_save = {
-        lsp_fallback = true,
-        async = false,
+        lsp_format = "fallback",
         timeout_ms = 1000,
       },
     })
@@ -37,6 +42,6 @@ return {
         async = false,
         timeout_ms = 1000,
       })
-    end, { desc = "Format file or range (in visual mode)" })
+    end, { desc = "Formater le fichier ou la sélection" })
   end,
 }

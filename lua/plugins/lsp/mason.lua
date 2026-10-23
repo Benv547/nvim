@@ -2,16 +2,11 @@ return {
   "mason-org/mason.nvim",
   dependencies = {
     "mason-org/mason-lspconfig.nvim",
+    -- installe aussi les outils qui ne sont pas des LSP (formateurs)
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
   config = function()
-    -- import de mason
-    local mason = require("mason")
-
-    -- import de mason-lspconfig
-    local mason_lspconfig = require("mason-lspconfig")
-
-    -- Active mason et personnalise les icônes
-    mason.setup({
+    require("mason").setup({
       ui = {
         icons = {
           package_installed = "✓",
@@ -21,27 +16,41 @@ return {
       },
     })
 
-    mason_lspconfig.setup({
+    require("mason-lspconfig").setup({
       automatic_enable = true,
-      -- Liste des serveurs à installer par défaut
-      -- List des serveurs possibles : https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-      -- Vous pouvez ne pas en mettre ici et tout installer en utilisant :Mason
-      -- Mais au lieu de passer par :Mason pour installer, je vous recommande d'ajouter une entrée à cette liste
-      -- Ça permettra à votre configuration d'être plus portable
+      -- Serveurs LSP installés automatiquement
+      -- Liste complète : https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
       ensure_installed = {
-        "angularls",
-        "cssls",
-        "elmls",
-        "graphql",
+        -- Rust
+        "rust_analyzer",
+        "taplo", -- Cargo.toml
+        -- Web
         "html",
-        "lua_ls",
+        "cssls",
+        "emmet_language_server",
+        "tailwindcss",
+        "ts_ls",
+        "eslint",
+        "angularls",
+        "vue_ls",
+        -- Python
         "pylsp",
         "ruff",
-        "rust_analyzer",
+        -- SQL
         "sqlls",
-        "svelte",
-        "ts_ls",
+        -- Divers
+        "jsonls",
         "yamlls",
+        "lua_ls",
+      },
+    })
+
+    -- Formateurs appelés par conform.nvim
+    -- (rustfmt n'est pas listé : il est fourni par rustup)
+    require("mason-tool-installer").setup({
+      ensure_installed = {
+        "prettier",
+        "stylua",
       },
     })
   end,

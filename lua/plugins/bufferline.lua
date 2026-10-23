@@ -16,12 +16,8 @@ return {
 
     local function is_protected_win(win)
       if not vim.api.nvim_win_is_valid(win) then return true end
-      local b    = vim.api.nvim_win_get_buf(win)
-      local name = vim.api.nvim_buf_get_name(b)
-      local ft   = vim.bo[b].filetype
-      return ft == "NvimTree"
-          or name:find("Lexique547>Camera")  ~= nil
-          or name:find("Lexique547>Notepad") ~= nil
+      local b = vim.api.nvim_win_get_buf(win)
+      return vim.bo[b].filetype == "NvimTree"
     end
 
     local function best_replacement(exclude)
@@ -70,6 +66,7 @@ return {
     require("bufferline").setup({
       options = {
         separator_style = "slant",
+        diagnostics = "nvim_lsp", -- affiche les erreurs LSP sur les onglets
         offsets = { { filetype = "NvimTree", text = "", padding = 1 } },
         close_command        = function(bufnr) close_buf(bufnr) end,
         right_mouse_command  = function(bufnr) close_buf(bufnr) end,
@@ -89,7 +86,11 @@ return {
     -- <leader>bd → raccourci rapide
     vim.keymap.set("n", "<leader>bd", function()
       close_buf(vim.api.nvim_get_current_buf())
-    end, { noremap = true, silent = true, desc = "Fermer le buffer courant" })
+    end, { silent = true, desc = "Fermer le buffer courant" })
+
+    -- Shift-h / Shift-l : buffer précédent / suivant, dans l'ordre affiché par bufferline
+    vim.keymap.set("n", "<S-h>", "<cmd>BufferLineCyclePrev<CR>", { silent = true, desc = "Buffer précédent" })
+    vim.keymap.set("n", "<S-l>", "<cmd>BufferLineCycleNext<CR>", { silent = true, desc = "Buffer suivant" })
 
   end,
 }

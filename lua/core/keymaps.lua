@@ -1,66 +1,47 @@
--- On définit notre touche leader sur espace
+-- On définit les touches leader sur espace (avant le chargement de lazy.nvim)
 vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 -- Raccourci pour la fonction set
 local keymap = vim.keymap.set
 
--- on copie le fichier dans le presse-papiers du système
-keymap('n', '<leader>ya', ':%y+<CR>', { noremap = true, silent = true })
--- on utilise ;; pour sortir du monde insertion
+-- on copie le fichier entier dans le presse-papiers du système
+keymap("n", "<leader>ya", ":%y+<CR>", { silent = true, desc = "Copier tout le fichier" })
+
+-- on utilise ;; pour sortir du mode insertion
 keymap("i", ";;", "<ESC>", { desc = "Sortir du mode insertion avec ;;" })
 
 -- on efface le surlignage de la recherche
-keymap("n", "<leader>nh", ":nohl<CR>", { desc = "Effacer le surlignage de la recherche" })
+keymap("n", "<leader>nh", ":nohl<CR>", { silent = true, desc = "Effacer le surlignage de la recherche" })
 
--- I déplace le texte sélectionné vers le haut en mode visuel (activé avec v)
-keymap("v", "<S-i>", ":m .-2<CR>==", { desc = "Déplace le texte sélectionné vers le haut en mode visuel" })
--- K déplace le texte sélectionné vers le bas en mode visuel (activé avec v)
-keymap("v", "<S-k>", ":m .+1<CR>==", { desc = "Déplace le texte sélectionné vers le bas en mode visuel" })
+-- Alt-j / Alt-k déplacent la ligne ou la sélection
+-- (I et K restent libres : Ctrl-v + I permet toujours l'insertion multi-lignes)
+keymap("n", "<A-j>", ":move .+1<CR>==", { silent = true, desc = "Descendre la ligne" })
+keymap("n", "<A-k>", ":move .-2<CR>==", { silent = true, desc = "Monter la ligne" })
+keymap("x", "<A-j>", ":move '>+1<CR>gv=gv", { silent = true, desc = "Descendre la sélection" })
+keymap("x", "<A-k>", ":move '<-2<CR>gv=gv", { silent = true, desc = "Monter la sélection" })
 
--- I déplace le texte sélectionné vers le haut en mode visuel bloc (activé avec V)
-keymap(
-  "x",
-  "<S-i>",
-  ":move '<-2<CR>gv-gv",
-  { desc = "Déplace le texte sélectionné vers le haut en mode visuel bloc" }
-)
--- K déplace le texte sélectionné vers le bas en mode visuel (activé avec V)
-keymap(
-  "x",
-  "<S-k>",
-  ":move '>+1<CR>gv-gv",
-  { desc = "Déplace le texte sélectionné vers le bas en mode visuel bloc" }
-)
+-- Changement de fenêtre avec Ctrl + déplacement au lieu de Ctrl-w + déplacement
+keymap("n", "<C-h>", "<C-w>h", { desc = "Fenêtre de gauche" })
+keymap("n", "<C-j>", "<C-w>j", { desc = "Fenêtre du bas" })
+keymap("n", "<C-k>", "<C-w>k", { desc = "Fenêtre du haut" })
+keymap("n", "<C-l>", "<C-w>l", { desc = "Fenêtre de droite" })
 
--- Changement de fenêtre avec Ctrl + déplacement uniquement au lieu de Ctrl-w + déplacement
-keymap("n", "<C-h>", "<C-w>h", { desc = "Déplace le curseur dans la fenêtre de gauche" })
-keymap("n", "<C-j>", "<C-w>j", { desc = "Déplace le curseur dans la fenêtre du bas" })
-keymap("n", "<C-k>", "<C-w>k", { desc = "Déplace le curseur dans la fenêtre du haut" })
-keymap("n", "<C-l>", "<C-w>l", { desc = "Déplace le curseur dans la fenêtre droite" })
+-- Désactivation des flèches en mode normal
+keymap("n", "<Up>", "<Nop>", { desc = "Flèche haut désactivée" })
+keymap("n", "<Down>", "<Nop>", { desc = "Flèche bas désactivée" })
+keymap("n", "<Left>", "<Nop>", { desc = "Flèche gauche désactivée" })
+keymap("n", "<Right>", "<Nop>", { desc = "Flèche droite désactivée" })
 
--- Ajoutez dans votre init.lua
-keymap('n', '<Up>', '<Nop>', { desc = 'Disable up arrow' })
-keymap('n', '<Down>', '<Nop>', { desc = 'Disable down arrow' })
-keymap('n', '<Left>', '<Nop>', { desc = 'Disable left arrow' })
-keymap('n', '<Right>', '<Nop>', { desc = 'Disable right arrow' })
+-- Navigation entre les buffers : voir lua/plugins/bufferline.lua (<S-h> / <S-l>)
+-- Raccourcis LSP : voir lua/plugins/lsp/lspconfig.lua (actifs seulement quand un LSP est attaché)
 
--- Navigation entre les buffers
-keymap("n", "<S-l>", ":bnext<CR>", opts)
-keymap("n", "<S-h>", ":bprevious<CR>", opts)
-
--- Dans votre configuration
-keymap('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
-keymap('n', 'gr', vim.lsp.buf.references, { desc = 'Find references' })
-keymap('n', 'K', vim.lsp.buf.hover, { desc = 'Hover documentation' })
-keymap('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code action' })
-keymap('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename' })
-
--- Navigation entre .ts et .html
-keymap('n', '<leader>at', function()
-  local file = vim.fn.expand('%:r')
-  if vim.fn.expand('%:e') == 'ts' then
-    vim.cmd('edit ' .. file .. '.html')
+-- Angular : bascule entre .ts et .html d'un même composant
+keymap("n", "<leader>at", function()
+  local file = vim.fn.expand("%:r")
+  if vim.fn.expand("%:e") == "ts" then
+    vim.cmd("edit " .. file .. ".html")
   else
-    vim.cmd('edit ' .. file .. '.ts')
+    vim.cmd("edit " .. file .. ".ts")
   end
-end, { desc = 'Toggle between TS and HTML' })
+end, { desc = "Basculer entre TS et HTML" })

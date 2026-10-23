@@ -13,9 +13,15 @@ return {
         -- Mappings par défaut
         api.config.mappings.default_on_attach(bufnr)
 
+        -- On libère Ctrl-k (« Info » par défaut) pour garder la navigation entre fenêtres
+        vim.keymap.del("n", "<C-k>", { buffer = bufnr })
+
         -- Mapping $ pour exécuter une commande dans le chemin courant
         vim.keymap.set("n", "$", function()
           local node = api.tree.get_node_under_cursor()
+          if not node or not node.absolute_path then
+            return
+          end
           local path
 
           -- Si c'est un fichier, prendre le dossier parent
